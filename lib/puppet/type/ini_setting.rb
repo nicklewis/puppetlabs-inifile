@@ -1,5 +1,27 @@
 Puppet::Type.newtype(:ini_setting) do
 
+  def self.title_patterns
+    identity = lambda {|x| x}
+    strip_brackets = lambda{|x| x.gsub(/^\[|\]$/, '')}
+
+    [
+      [/^(\S+)\s+\[([^\]]+)\]\s+([^=]+?)\s*=(.+)$/m,
+        [[:path,    identity],
+         [:section, strip_brackets],
+         [:setting, identity],
+         [:value,   identity]]],
+      [/^(\S+)\s+\[([^\]]+)\]\s+(\S+)$/m,
+        [[:path,    identity],
+         [:section, strip_brackets],
+         [:setting, identity]]],
+      [/^\[([^\]]+)\]\s+(\S+)$/m,
+        [[:section, strip_brackets],
+         [:setting, identity]]],
+      [/^(\S+)$/m,
+        [[:setting, identity]]],
+    ]
+  end
+
   ensurable do
     defaultvalues
     defaultto :present
